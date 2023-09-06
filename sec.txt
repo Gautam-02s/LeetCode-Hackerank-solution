@@ -1,1 +1,46 @@
-hello ,i am sendiing this to the git hub repo
+#!/bin/bash
+
+# Define thresholds
+MEMORY_THRESHOLD=80
+DISK_THRESHOLD=80
+CPU_THRESHOLD=80
+
+# Function to check memory usage
+check_memory_usage() {
+    MEMORY_USAGE=$(free | awk '/Mem/ {print int($3/$2 * 100)}')
+    
+    if [ "$MEMORY_USAGE" -ge "$MEMORY_THRESHOLD" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: Memory usage is above $MEMORY_THRESHOLD%."
+    fi
+}
+
+# Function to check disk usage
+check_disk_usage() {
+    DISK_USAGE=$(df -h / | awk 'NR==2 {print int($5)}' | tr -d '%')
+    
+    if [ "$DISK_USAGE" -ge "$DISK_THRESHOLD" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: Disk usage is above $DISK_THRESHOLD%."
+    fi
+}
+
+# Function to check CPU usage
+check_cpu_usage() {
+    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print int($2)}')
+    
+    if [ "$CPU_USAGE" -ge "$CPU_THRESHOLD" ]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') WARNING: CPU usage is above $CPU_THRESHOLD%."
+    fi
+}
+
+# Function to check battery status (Linux-only)
+
+# Main loop
+SLEEP_INTERVAL=60
+
+while true; do
+    check_memory_usage
+    check_disk_usage
+    check_cpu_usage
+    #check_battery_status
+    sleep $SLEEP_INTERVAL
+done
